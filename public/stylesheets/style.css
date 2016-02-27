@@ -1,0 +1,42 @@
+body {
+    padding: 50px;
+    font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+    color: #00B7FF;
+}
+
+.form-table {
+    display: table;
+    width: 100%;
+}
+
+.form-row {
+    display: table-row;
+}
+
+.form-cell-label, .form-cell-input {
+    display: table-cell;
+    padding-bottom: 5px;
+}
+
+.form-cell-label {
+    width: 20%;
+    padding: 3px;
+    vertical-align: top;
+}
+
+input {
+    width: 100%;
+}
+
+textarea{
+    width: 100%;
+}
+
+div.error {
+    display: inline-block;
+    color: #cd0a0a;
+    padding-top: 3px;
+}

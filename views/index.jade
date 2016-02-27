@@ -1,0 +1,45 @@
+extends layout
+
+block content
+    h1= title
+    p Welcome to #{title}
+
+    form(id="testform", name="testform", method="post", action="/lightnovels/createLightNovel")
+        .form-table
+            .form-row
+                .form-cell-label
+                    label(for="title") Title
+                .form-cell-input
+                    input(type="text", id="title", name="title")
+            .form-row
+                .form-cell-label
+                    label(for="author") Author
+                .form-cell-input
+                    input(type="text", id="author", name="author")
+            .form-row
+                .form-cell-label
+                    label(for="description") Description
+                .form-cell-input
+                    textarea(form="testform", name="description", id="description", rows="4")
+            .form-row
+                .form-cell-label
+                    label(for="completed") Completed
+                .form-cell-input
+                    input(type="checkbox", id="completed", name="completed")
+            .form-row
+                .form-cell-label
+                    label(for="tsite") Translator site
+                .form-cell-input
+                    input(type="text", id="tsite", name="tsite")
+            .form-row
+                .form-cell-label
+                    label Genres
+                .form-cell-input#genreFormCell
+                    input(type="text", name="genres[i]", onchange="addGenreField")
+                    script.
+                        var addGenreField = function() {
+                            $("#genreFormCell").
+                        }
+            .form-row
+                .form-cell
+                    input(type="submit", value="Submit", id="submit")
