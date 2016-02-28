@@ -1,9 +1,10 @@
-DROP TABLE IF EXISTS books, lightnovels, manga, genres;
+DROP TABLE IF EXISTS  lightnovels_genres, books_genres, manga_genres, books, lightnovels, manga, genres;
 
 CREATE TABLE genres
 (
-  name VARCHAR(50) NOT NULL UNIQUE,
-  PRIMARY KEY (name)
+  genre_id   INTEGER     NOT NULL AUTO_INCREMENT,
+  genre_name VARCHAR(50) NOT NULL UNIQUE,
+  PRIMARY KEY (genre_id)
 );
 
 CREATE TABLE books
@@ -11,11 +12,9 @@ CREATE TABLE books
   book_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(500),
+  description VARCHAR(5000),
   link VARCHAR(255),
-  genre_id INTEGER NOT NULL,
-  PRIMARY KEY (book_id),
-  FOREIGN KEY (genre_id) REFERENCES genres(name)
+  PRIMARY KEY (book_id)
 );
 
 CREATE TABLE manga
@@ -23,12 +22,10 @@ CREATE TABLE manga
   manga_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(500),
+  description VARCHAR(5000),
   completed BOOLEAN,
-  genre_id INTEGER NOT NULL,
   translator_site VARCHAR(255) NOT NULL,
-  PRIMARY KEY (manga_id),
-  FOREIGN KEY (genre_id) REFERENCES genres(name)
+  PRIMARY KEY (manga_id)
 );
 
 CREATE TABLE lightnovels
@@ -36,37 +33,35 @@ CREATE TABLE lightnovels
   lightnovel_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(500),
+  description VARCHAR(5000),
   completed BOOLEAN,
   translator_site VARCHAR(255) NOT NULL,
-  genre_id INTEGER NOT NULL,
-  PRIMARY KEY (lightnovel_id),
-  FOREIGN KEY (genre_id) REFERENCES genres(name) # change to many to many relationship
+  PRIMARY KEY (lightnovel_id)
 );
 
-CREATE TABLE lightnovels_genre
+CREATE TABLE lightnovels_genres
 (
   lightnovel_id INTEGER NOT NULL,
-  genre_name VARCHAR(50) NOT NULL,
-  PRIMARY KEY(lightnovel_id,genre_name),
+  genre_id INTEGER NOT NULL,
+  PRIMARY KEY(lightnovel_id,genre_id),
   FOREIGN KEY (lightnovel_id) REFERENCES lightnovels(lightnovel_id),
-  FOREIGN KEY (genre_name) REFERENCES genres(name)
+  FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
 );
 
-CREATE TABLE manga_genre
+CREATE TABLE manga_genres
 (
   manga_id INTEGER NOT NULL,
-  genre_name VARCHAR(50) NOT NULL,
-  PRIMARY KEY (manga_id, genre_name),
+  genre_id INTEGER NOT NULL,
+  PRIMARY KEY (manga_id, genre_id),
   FOREIGN KEY (manga_id) REFERENCES manga(manga_id),
-  FOREIGN KEY (genre_name) REFERENCES genres(name)
+  FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
 );
 
-CREATE TABLE book_genre
+CREATE TABLE books_genres
 (
   book_id INTEGER NOT NULL,
-  genre_name VARCHAR(50) NOT NULL,
-  PRIMARY KEY (book_id, genre_name),
+  genre_id INTEGER NOT NULL,
+  PRIMARY KEY (book_id, genre_id),
   FOREIGN KEY (book_id) REFERENCES books(book_id),
-  FOREIGN KEY (genre_name) REFERENCES genres(name)
+  FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
 );

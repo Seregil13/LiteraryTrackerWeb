@@ -20,7 +20,8 @@ router.post('/createLightNovel', function(req, res, next) {
         completed: req.body.completed ? true : false,
         translator_site: req.body.tsite
     };
-    var insertLightNovel = "INSERT INTO lightnovels SET ?"; // NOTE: This will only be effective with mysql
+    // NOTE: This will only be effective with mysql as 'SET' is a convenience added by mysql
+    var insertLightNovel = "INSERT INTO lightnovels SET ?";
 
     var genres = req.body.genres;
 
@@ -29,6 +30,7 @@ router.post('/createLightNovel', function(req, res, next) {
     var query = req.db.query(insertLightNovel, lightnovel, function(err, rows) {
         if (err) throw err;
 
+        console.log(rows);
         console.log("Inserted: " + mysql.format(insertLightNovel, lightnovel));
         res.end();
     });
