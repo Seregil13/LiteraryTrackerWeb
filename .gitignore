@@ -2,5 +2,5 @@
 node_modules/
 public/images/
 
-public/javascripts/databaseConfig.js
+public/js/config.js
 *.iml

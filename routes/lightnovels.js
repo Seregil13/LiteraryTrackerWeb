@@ -30,29 +30,47 @@ router.post('/createLightNovel', function(req, res, next) {
     var query = req.db.query(insertLightNovel, lightnovel, function(err, rows) {
         if (err) throw err;
 
+        //var lnId = rows.insertId;
+        //
+        //var insert = "INSERT INTO lightnovels_genres VALUES ";
+        //
+        //for (var i = 0; i < genres.length; ++i) {
+        //    insert += ()
+        //}
+        //
+        //req.db.query()
+
         console.log(rows);
         console.log("Inserted: " + mysql.format(insertLightNovel, lightnovel));
         res.end();
     });
 });
 
-router.get('/listLightNovels', function(req, res, next) {
+router.get('/list', function(req, res, next) {
 
     req.db.query("SELECT ln.lightnovel_id, ln.title, ln.author FROM lightnovels ln;", function(err, rows) {
         if (err) throw err; // TODO: Handle mysql errors more gracefully
 
-        console.log(rows);
-        res.json(rows);
+        var output = [];
+        for (var i = 0; i < rows.length; ++i) {
+
+            var novel = {
+                "id": rows[i].lightnovel_id,
+                "title": rows[i].title,
+                "author": rows[i].author
+            };
+            output.push(novel)
+        }
+        res.json(output);
     });
 });
 
-router.get('/getLightNovel/:lnId', function (req, res, next) {
-    // TODO: get all data involving light novel with name lnName
+router.get('/get/:lnId', function (req, res, next) {
 
     var query = "SELECT * FROM lightnovels ln INNER JOIN lightnovels_genres lng ON ln.lightnovel_id = lng.lightnovel_id INNER JOIN genres g ON lng.genre_id = g.genre_id WHERE ln.lightnovel_id=?";
     //query += req.db.escape(req.params.lnId);
 
-    req.db.query(query, [ req.params.ln_id ], function(err, rows) {
+    req.db.query(query, [ req.params.lnId ], function(err, rows) {
         if (err) throw err; // TODO: handle MySQL errors more gracefully
 
         // Formats the query results into a single javascript object because query  returns with the number of rows equal to the number of genres a light novel is a part of.

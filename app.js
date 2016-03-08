@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var db = require("./public/javascripts/database");
+var db = require("./public/js/database");
 
 // TODO: Create a schema that can be used everywhere so I only have to change one place if the database schema changes
 var db_tables = {

@@ -3,5 +3,5 @@
  * information required by the mysql connection
  */
 
-var config = require('./databaseConfig');
-module.exports = require('mysql').createConnection(config);
+var config = require('./config');
+module.exports = require('mysql').createConnection(config.db);
