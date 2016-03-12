@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
     res.render('index', { title: 'Express' });
 });
 
-router.post('/createLightNovel', function(req, res, next) {
+router.post('/create', function(req, res, next) {
 
     // NOTE: Creates an object to be inserted and escaped by the 'query' function
     var lightnovel = {
@@ -88,7 +88,21 @@ router.get('/get/:lnId', function (req, res, next) {
         }
 
         res.json(result);
-    })
+    });
+});
+
+router.get("/exists/:lnTitle", function(req, res, next) {
+    var query = "SELECT EXISTS(SELECT 1 FROM lightnovels WHERE title=?) AS exist";
+
+    req.db.query(query, [ req.params.lnTitle ], function(err, rows) {
+        if (err) throw err; // TODO: handle MySQL errors more gracefully
+
+        var result= {
+            "exists": rows[0].exist == 1
+        };
+
+        res.json(result);
+    });
 });
 
 module.exports = router;

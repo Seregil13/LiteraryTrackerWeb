@@ -12,7 +12,7 @@ CREATE TABLE books
   book_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(5000),
+  description TEXT,
   link VARCHAR(255),
   PRIMARY KEY (book_id)
 );
@@ -22,7 +22,7 @@ CREATE TABLE manga
   manga_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(5000),
+  description TEXT,
   completed BOOLEAN,
   translator_site VARCHAR(255) NOT NULL,
   PRIMARY KEY (manga_id)
@@ -33,7 +33,7 @@ CREATE TABLE lightnovels
   lightnovel_id INTEGER NOT NULL AUTO_INCREMENT,
   title VARCHAR(50) NOT NULL,
   author VARCHAR(50),
-  description VARCHAR(5000),
+  description TEXT,
   completed BOOLEAN,
   translator_site VARCHAR(255) NOT NULL,
   PRIMARY KEY (lightnovel_id)
