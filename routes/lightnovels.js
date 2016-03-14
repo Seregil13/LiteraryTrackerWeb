@@ -67,7 +67,7 @@ router.get('/list', function(req, res, next) {
 
 router.get('/get/:lnId', function (req, res, next) {
 
-    var query = "SELECT * FROM lightnovels ln INNER JOIN lightnovels_genres lng ON ln.lightnovel_id = lng.lightnovel_id INNER JOIN genres g ON lng.genre_id = g.genre_id WHERE ln.lightnovel_id=?";
+    var query = "SELECT * FROM lightnovels ln LEFT JOIN lightnovels_genres lng ON ln.lightnovel_id = lng.lightnovel_id LEFT JOIN genres g ON lng.genre_id = g.genre_id WHERE ln.lightnovel_id=?";
     //query += req.db.escape(req.params.lnId);
 
     req.db.query(query, [ req.params.lnId ], function(err, rows) {
@@ -75,6 +75,7 @@ router.get('/get/:lnId', function (req, res, next) {
 
         // Formats the query results into a single javascript object because query  returns with the number of rows equal to the number of genres a light novel is a part of.
         var result = {
+            "id": req.params.lnId,
             "title": rows[0].title,
             "author": rows[0].author,
             "description": rows[0].description,
@@ -83,8 +84,10 @@ router.get('/get/:lnId', function (req, res, next) {
             "genres": []
         };
 
-        for (var i = 0; i < rows.length; ++i) {
-            result.genres.push(rows[i].genre_name);
+        if (rows[0].genre_name) {
+            for (var i = 0; i < rows.length; ++i) {
+                result.genres.push(rows[i].genre_name);
+            }
         }
 
         res.json(result);
