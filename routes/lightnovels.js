@@ -20,35 +20,194 @@ router.post('/create', function(req, res, next) {
         completed: req.body.completed ? true : false,
         translator_site: req.body.tsite
     };
-    // NOTE: This will only be effective with mysql as 'SET' is a convenience added by mysql
-    var insertLightNovel = "INSERT INTO lightnovels SET ?";
 
-    var genres = req.body.genres;
+    var genres = req.body.genres.split(','); // FIXME: find better way to upload genres list
 
-    console.log("Inserting: " + mysql.format(insertLightNovel, lightnovel));
+    /**
+     * This is valid MySQL syntax but not valid SQL syntax
+     *
+     * https://dev.mysql.com/doc/refman/5.6/en/insert.html
+     */
+    var insert = "INSERT INTO " + req.schema.LightNovels.table_name + " SET ?";
 
-    var query = req.db.query(insertLightNovel, lightnovel, function(err, rows) {
+    req.db.query(insert, [ lightnovel ], function(err, rows) {
+        if (err) throw err; // TODO: handle error nicer
+
+        var lnId = rows.insertId;
+        if (genres.length < 1) return;
+
+        /* Inserts any genres that don't already exist into the system */
+        var insertGenres = "INSERT IGNORE INTO " + req.schema.Genres.table_name + "(" + req.schema.Genres.columns.name + ") VALUES ";
+        for (var i = 0; i < genres.length - 1; ++i) {
+            insertGenres += "(" + req.db.escape(genres[i].trim()) + "),";
+        }
+        insertGenres += "(" + req.db.escape(genres[genres.length - 1].trim()) + ")";
+
+        console.log("Insert Genres: " + insertGenres);
+
+        req.db.query(insertGenres, function (err, rows) {
+            if (err) throw err;
+
+            /* Inserts the many-many relationship of genres and light novels */
+            var insertLnGenres = "INSERT INTO " + req.schema.LightNovelGenres.table_name + " VALUES";
+            for (var i = 0; i < genres.length - 1; ++i) {
+                insertLnGenres += "(" + req.db.escape(lnId) +
+                    ", (SELECT " + req.schema.Genres.columns.id +
+                    " FROM " + req.schema.Genres.table_name +
+                    " WHERE " + req.schema.Genres.columns.name + "=" + req.db.escape(genres[i].trim()) + ")),";
+            }
+
+            insertLnGenres += "(" + req.db.escape(lnId) +
+                ", (SELECT " + req.schema.Genres.columns.id +
+                " FROM " + req.schema.Genres.table_name +
+                " WHERE " + req.schema.Genres.columns.name + "=" + req.db.escape(genres[i].trim()) + "))";
+
+            console.log("Insert LN Genres: " + insertLnGenres);
+
+            req.db.query(insertLnGenres, function (err, rows) {
+                if (err) throw err;
+
+                console.log("Inserted " + rows.rowsAffected + " genres for " + lightnovel.title);
+                res.end();
+            })
+        });
+    });
+});
+
+// TODO: actually create a form to be used on a website
+router.get('/update/:lnId', function (req, res, next) {
+
+    var query = "SELECT * FROM " + req.schema.LightNovels.table_name + " ln " +
+        "LEFT JOIN " + req.schema.LightNovelGenres.table_name + " lng " +
+        "ON ln." + req.schema.LightNovels.columns.id + " = lng." + req.schema.LightNovelGenres.columns.ln + " " +
+        "LEFT JOIN " + req.schema.Genres.table_name + " g" +
+        " ON lng." + req.schema.LightNovelGenres.columns.genre + " = g." + req.schema.Genres.columns.id + " " +
+        "WHERE ln." + req.schema.LightNovels.columns.id + "=?";
+
+    req.db.query(query, [ req.params.lnId ], function (err, rows) {
         if (err) throw err;
 
-        //var lnId = rows.insertId;
-        //
-        //var insert = "INSERT INTO lightnovels_genres VALUES ";
-        //
-        //for (var i = 0; i < genres.length; ++i) {
-        //    insert += ()
-        //}
-        //
-        //req.db.query()
+        var result = {
+            "id": req.params.lnId,
+            "title": rows[0].title,
+            "author": rows[0].author,
+            "description": rows[0].description,
+            "completed": rows[0].completed ? true : false,
+            "translatorSite": rows[0].translator_site,
+            "genres": []
+        };
 
-        console.log(rows);
-        console.log("Inserted: " + mysql.format(insertLightNovel, lightnovel));
-        res.end();
-    });
+        /* Finds all the genres associated with the light novel and puts them into an array */
+        if (rows[0].genre_name) {
+            for (var i = 0; i < rows.length; ++i) {
+                result.genres.push(rows[i].genre_name);
+            }
+        }
+
+        res.render('update', {
+            id: req.params.lnId,
+            title: result.title,
+            author: result.author,
+            description: result.description,
+            completed: result.completed,
+            translatorSite: result.translatorSite,
+            genres: result.genres.join(',')
+        })
+    })
+
+});
+
+router.post('/update/:lnId', function (req, res, next) {
+
+    // TODO: update
+
+    var id = req.params.lnId;
+
+    if (!isNaN(id)) {
+
+        var genres = req.body.genres.split(','); // fixme: find a better way to get the genres
+
+        var values = {
+            title: req.body.title,
+            author: req.body.author,
+            completed: req.body.completed ? true : false,
+            description: req.body.description,
+            translator_site: req.body.tsite
+        };
+        
+        var update = "UPDATE ?? SET ? WHERE lightnovel_id = ?";
+
+        /* Update  */
+        req.db.query(update, [ req.schema.LightNovels.table_name, values, id ], function(err, rows) {
+           if (err) throw err; // TODO: handle error nicer
+
+            console.log(rows.changedRows);
+
+            if (genres.length < 1) return;
+
+            /* Inserts any genres that don't already exist into the system */
+            var insertGenres = "INSERT IGNORE INTO " + req.schema.Genres.table_name + "(" + req.schema.Genres.columns.name + ") VALUES ";
+            for (var i = 0; i < genres.length - 1; ++i) {
+                insertGenres += "(" + req.db.escape(genres[i].trim()) + "),";
+            }
+            insertGenres += "(" + req.db.escape(genres[genres.length - 1].trim()) + ")";
+
+            console.log("Insert Genres: " + insertGenres);
+
+            /* Insert any new genres while ignoring any problems from inserting values that already exist */
+            req.db.query(insertGenres, function (err, rows) {
+                if (err) throw err;
+
+                /* Inserts the many-many relationship of genres and light novels */
+                var insertLnGenres = "INSERT IGNORE INTO " + req.schema.LightNovelGenres.table_name + " VALUES";
+                for (var i = 0; i < genres.length - 1; ++i) {
+                    insertLnGenres += "(" + req.db.escape(id) +
+                        ", (SELECT " + req.schema.Genres.columns.id +
+                        " FROM " + req.schema.Genres.table_name +
+                        " WHERE " + req.schema.Genres.columns.name + "=" + req.db.escape(genres[i].trim()) + ")),";
+                }
+
+                insertLnGenres += "(" + req.db.escape(id) +
+                    ", (SELECT " + req.schema.Genres.columns.id +
+                    " FROM " + req.schema.Genres.table_name +
+                    " WHERE " + req.schema.Genres.columns.name + "=" + req.db.escape(genres[i].trim()) + "))";
+
+                console.log("Insert LN Genres: " + insertLnGenres);
+
+                req.db.query(insertLnGenres, function (err, rows) {
+                    if (err) throw err;
+
+                    var deleteLnGenres = "DELETE FROM " + req.schema.LightNovelGenres.table_name +
+                            " WHERE " + req.schema.LightNovelGenres.columns.ln + "=" + id +
+                            " AND " + req.schema.LightNovelGenres.columns.genre +
+                            " NOT IN (SELECT " + req.schema.Genres.columns.id +
+                            " FROM " + req.schema.Genres.table_name +
+                            " WHERE " + req.schema.Genres.columns.name + " IN (" +
+                            genres.map(function (v) {
+                                return req.db.escape(v);
+                            }).reduce(function (p,c,i,a) {
+                                return p + ',' + c;
+                            }) + "))";
+
+                    console.log(deleteLnGenres);
+
+                    req.db.query(deleteLnGenres, function (err, rows) {
+                        if (err) throw err; // TODO
+
+                        res.redirect('/');
+                    });
+                })
+            });
+        });
+    }
 });
 
 router.get('/list', function(req, res, next) {
 
-    req.db.query("SELECT ln.lightnovel_id, ln.title, ln.author FROM lightnovels ln;", function(err, rows) {
+    var select = "SELECT ?? FROM ??;";
+    var columns = [req.schema.LightNovels.columns.id, req.schema.LightNovels.columns.title, req.schema.LightNovels.columns.author ];
+
+    req.db.query(select, [ columns, req.schema.LightNovels.table_name ], function(err, rows) {
         if (err) throw err; // TODO: Handle mysql errors more gracefully
 
         var output = [];
@@ -67,8 +226,13 @@ router.get('/list', function(req, res, next) {
 
 router.get('/get/:lnId', function (req, res, next) {
 
-    var query = "SELECT * FROM lightnovels ln LEFT JOIN lightnovels_genres lng ON ln.lightnovel_id = lng.lightnovel_id LEFT JOIN genres g ON lng.genre_id = g.genre_id WHERE ln.lightnovel_id=?";
-    //query += req.db.escape(req.params.lnId);
+    /* See public/js/schema.js for the values in the schema */
+    var query = "SELECT * FROM " + req.schema.LightNovels.table_name + " ln " +
+        "LEFT JOIN " + req.schema.LightNovelGenres.table_name + " lng " +
+        "ON ln." + req.schema.LightNovels.columns.id + " = lng." + req.schema.LightNovelGenres.columns.ln + " " +
+        "LEFT JOIN " + req.schema.Genres.table_name + " g" +
+        " ON lng." + req.schema.LightNovelGenres.columns.genre + " = g." + req.schema.Genres.columns.id + " " +
+        "WHERE ln." + req.schema.LightNovels.columns.id + "=?";
 
     req.db.query(query, [ req.params.lnId ], function(err, rows) {
         if (err) throw err; // TODO: handle MySQL errors more gracefully
@@ -84,6 +248,7 @@ router.get('/get/:lnId', function (req, res, next) {
             "genres": []
         };
 
+        /* Finds all the genres associated with the light novel and puts them into an array */
         if (rows[0].genre_name) {
             for (var i = 0; i < rows.length; ++i) {
                 result.genres.push(rows[i].genre_name);
@@ -94,8 +259,9 @@ router.get('/get/:lnId', function (req, res, next) {
     });
 });
 
+// TODO: Figure out if this is even needed ??
 router.get("/exists/:lnTitle", function(req, res, next) {
-    var query = "SELECT EXISTS(SELECT 1 FROM lightnovels WHERE title=?) AS exist";
+    var query = "SELECT EXISTS(SELECT 1 FROM " + req.schema.LightNovels.table_name + " WHERE " + req.schema.LightNovels.columns.title + "=?) AS exist";
 
     req.db.query(query, [ req.params.lnTitle ], function(err, rows) {
         if (err) throw err; // TODO: handle MySQL errors more gracefully

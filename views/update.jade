@@ -1,41 +1,39 @@
 extends layout
 
 block content
-    h1= title
-    p Welcome to #{title}
 
-    form(id="testform", name="testform", method="post", action="/lightnovels/create")
+    form(id="testform", name="testform", method="post", action="/lightnovels/update/#{id}")
         .form-table
             .form-row
                 .form-cell-label
                     label(for="title") Title
                 .form-cell-input
-                    input(type="text", id="title", name="title")
+                    input(type="text", id="title", name="title", value=title)
             .form-row
                 .form-cell-label
                     label(for="author") Author
                 .form-cell-input
-                    input(type="text", id="author", name="author")
+                    input(type="text", id="author", name="author", value=author)
             .form-row
                 .form-cell-label
                     label(for="description") Description
                 .form-cell-input
-                    textarea(form="testform", name="description", id="description", rows="4")
+                    textarea(form="testform", name="description", id="description", rows="4") #{description}
             .form-row
                 .form-cell-label
                     label(for="completed") Completed
                 .form-cell-input
-                    input(type="checkbox", id="completed", name="completed")
+                    input(type="checkbox", id="completed", name="completed", checked=completed)
             .form-row
                 .form-cell-label
                     label(for="tsite") Translator site
                 .form-cell-input
-                    input(type="text", id="tsite", name="tsite")
+                    input(type="text", id="tsite", name="tsite" value=translatorSite)
             .form-row
                 .form-cell-label
                     label Genres
                 .form-cell-input#genreFormCell
-                    input(type="text", name="genres")
+                    input(type="text", name="genres" value=genres)
             .form-row
                 .form-cell
                     input(type="submit", value="Submit", id="submit")

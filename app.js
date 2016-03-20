@@ -6,8 +6,6 @@ var cookieParser    = require('cookie-parser');
 var bodyParser      = require('body-parser');
 var mysql           = require('mysql');
 
-//var database = require('./public/javascripts/database');
-
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var lightnovels = require('./routes/lightnovels');
@@ -27,17 +25,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var db = require("./public/js/database");
-
-// TODO: Create a schema that can be used everywhere so I only have to change one place if the database schema changes
-var db_tables = {
-    lightnovels: "lightnovels",
-    books: "books",
-    manga: "manga"
-};
+var schema = require("./public/js/schema");
 
 app.use(function(req, res, next) {
     req.db = db;
-    req.db_tables = db_tables;
+    req.schema = schema;
     next();
 });
 
