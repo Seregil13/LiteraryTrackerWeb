@@ -81,7 +81,7 @@ router.post('/update/:lnId', function (req, res, next) {
             author: req.body.author,
             completed: req.body.completed ? true : false,
             description: req.body.description,
-            translator_site: req.body.tsite
+            translator_site: req.body.translatorSite
         };
         
         /* The update sql command */
