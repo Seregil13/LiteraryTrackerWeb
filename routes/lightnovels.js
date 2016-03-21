@@ -5,11 +5,6 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-    res.render('index', { title: 'Express' });
-});
-
 router.post('/create', function(req, res, next) {
 
     // NOTE: Creates an object to be inserted and escaped by the 'query' function
@@ -67,59 +62,13 @@ router.post('/create', function(req, res, next) {
             req.db.query(insertLnGenres, function (err, rows) {
                 if (err) throw err;
 
-                console.log("Inserted " + rows.rowsAffected + " genres for " + lightnovel.title);
-                res.end();
+                res.json({ success: true });
             })
         });
     });
 });
 
-// TODO: actually create a form to be used on a website
-router.get('/update/:lnId', function (req, res, next) {
-
-    var query = "SELECT * FROM " + req.schema.LightNovels.table_name + " ln " +
-        "LEFT JOIN " + req.schema.LightNovelGenres.table_name + " lng " +
-        "ON ln." + req.schema.LightNovels.columns.id + " = lng." + req.schema.LightNovelGenres.columns.ln + " " +
-        "LEFT JOIN " + req.schema.Genres.table_name + " g" +
-        " ON lng." + req.schema.LightNovelGenres.columns.genre + " = g." + req.schema.Genres.columns.id + " " +
-        "WHERE ln." + req.schema.LightNovels.columns.id + "=?";
-
-    req.db.query(query, [ req.params.lnId ], function (err, rows) {
-        if (err) throw err;
-
-        var result = {
-            "id": req.params.lnId,
-            "title": rows[0].title,
-            "author": rows[0].author,
-            "description": rows[0].description,
-            "completed": rows[0].completed ? true : false,
-            "translatorSite": rows[0].translator_site,
-            "genres": []
-        };
-
-        /* Finds all the genres associated with the light novel and puts them into an array */
-        if (rows[0].genre_name) {
-            for (var i = 0; i < rows.length; ++i) {
-                result.genres.push(rows[i].genre_name);
-            }
-        }
-
-        res.render('update', {
-            id: req.params.lnId,
-            title: result.title,
-            author: result.author,
-            description: result.description,
-            completed: result.completed,
-            translatorSite: result.translatorSite,
-            genres: result.genres.join(',')
-        })
-    })
-
-});
-
 router.post('/update/:lnId', function (req, res, next) {
-
-    // TODO: update
 
     var id = req.params.lnId;
 
@@ -135,13 +84,12 @@ router.post('/update/:lnId', function (req, res, next) {
             translator_site: req.body.tsite
         };
         
+        /* The update sql command */
         var update = "UPDATE ?? SET ? WHERE lightnovel_id = ?";
 
         /* Update  */
         req.db.query(update, [ req.schema.LightNovels.table_name, values, id ], function(err, rows) {
            if (err) throw err; // TODO: handle error nicer
-
-            console.log(rows.changedRows);
 
             if (genres.length < 1) return;
 
@@ -192,9 +140,9 @@ router.post('/update/:lnId', function (req, res, next) {
                     console.log(deleteLnGenres);
 
                     req.db.query(deleteLnGenres, function (err, rows) {
-                        if (err) throw err; // TODO
+                        if (err) throw err; // TODO better error handling
 
-                        res.redirect('/');
+                        res.json({success: true });
                     });
                 })
             });

@@ -1,4 +1,7 @@
 /**
+ * A central place for the database schema so if the schema changes only this file
+ * has to change and the rest of the application will follow suit.
+ *
  * Created by Alec on 3/18/2016.
  */
 
