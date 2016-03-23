@@ -9,6 +9,7 @@ var mysql           = require('mysql');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var lightnovels = require('./routes/lightnovels');
+var genres = require('./routes/genres');
 
 var app = express();
 
@@ -37,6 +38,7 @@ app.use(function(req, res, next) {
 app.use('/', routes);
 app.use('/users', users);
 app.use('/lightnovels', lightnovels);
+app.use('/genres', genres);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

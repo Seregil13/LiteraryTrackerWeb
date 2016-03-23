@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    h1= title
+    p Welcome to #{title}
+
+    form(id="testform2", name="testform2", method="post", action="/genres/create")
+        .form-table
+            .form-row
+                .form-cell-label
+                    label(for="genre") Genre Name
+                .form-cell-input
+                    input(type="text", id="genre", name="genre")
+            .form-row
+                .form-cell
+                    input(type="submit", value="Submit", id="submit")
