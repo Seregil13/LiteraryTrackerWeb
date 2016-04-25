@@ -14,7 +14,7 @@ module.exports = {
             author: 'author',
             description: 'description',
             completed: 'completed',
-            translator: 'translatorSite'
+            translator: 'translator_site'
         }
     },
     LightNovelGenres: {

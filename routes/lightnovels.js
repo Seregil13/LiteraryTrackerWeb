@@ -13,10 +13,10 @@ router.post('/create', function(req, res, next) {
         author: req.body.author,
         description: req.body.description,
         completed: req.body.completed ? true : false,
-        translator_site: req.body.tsite
+        translator_site: req.body.translator_site
     };
 
-    var genres = req.body.genres.split(','); // FIXME: find better way to upload genres list
+    var genres = req.body.genres.split(','); // NOTE: Genres are passed as a csv string
 
     /**
      * This is valid MySQL syntax but not valid SQL syntax
@@ -81,7 +81,7 @@ router.post('/update/:lnId', function (req, res, next) {
             author: req.body.author,
             completed: req.body.completed ? true : false,
             description: req.body.description,
-            translator_site: req.body.translatorSite
+            translator_site: req.body.translator_site
         };
         
         /* The update sql command */
@@ -192,7 +192,7 @@ router.get('/get/:lnId', function (req, res, next) {
             "author": rows[0].author,
             "description": rows[0].description,
             "completed": rows[0].completed ? true : false,
-            "translatorSite": rows[0].translator_site,
+            "translator_site": rows[0].translator_site,
             "genres": []
         };
 
