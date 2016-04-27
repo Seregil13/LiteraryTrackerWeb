@@ -14,7 +14,7 @@ router.post('/create', function (req, res, next) {
 
     var insert = "INSERT INTO ?? SET ?";
 
-    req.db.query(insert, [ req.schema.Genres.table_name, genre ], function (err, rows) {
+    req.db.query(insert, [ req.schema.genres.table_name, genre ], function (err, rows) {
         if (err) throw err;
 
         res.json({ succes: "true" });
@@ -26,7 +26,7 @@ router.get('/list', function (req, res, next) {
 
     var query = "SELECT * FROM ??";
 
-    req.db.query(query,  [ req.schema.Genres.table_name ], function (err, rows) {
+    req.db.query(query,  [ req.schema.genres.table_name ], function (err, rows) {
         if (err) throw err; // TODO: handle better
 
         var output = [];
